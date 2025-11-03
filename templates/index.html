@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="text-center">
+    <h1>Welcome to FitTrack</h1>
+    <p>Track meals and workouts — simple and fast.</p>
+    <a class="btn btn-primary" href="{{ url_for('register') }}">Get started</a>
+    <a class="btn btn-secondary" href="{{ url_for('login') }}">Log in</a>
+  </div>
+{% endblock %}

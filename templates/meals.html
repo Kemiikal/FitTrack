@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Meals</h2>
+<form method="post" class="row g-3">
+  <div class="col-md-6"><input name="name" placeholder="Meal name" class="form-control" required></div>
+  <div class="col-md-2"><input name="calories" placeholder="Calories" class="form-control" required></div>
+  <div class="col-md-2"><input name="protein" placeholder="Protein (g)" class="form-control"></div>
+  <div class="col-md-2"><input name="carbs" placeholder="Carbs (g)" class="form-control"></div>
+  <div class="col-md-2"><input name="fats" placeholder="Fats (g)" class="form-control"></div>
+  <div class="col-12"><button class="btn btn-primary">Add meal</button></div>
+</form>
+
+<hr>
+<h4>Recent meals</h4>
+<ul class="list-group">
+  {% for m in meals %}
+    <li class="list-group-item">{{ m.date }} — {{ m.name }} — {{ m.calories }} kcal</li>
+  {% else %}
+    <li class="list-group-item">No meals yet</li>
+  {% endfor %}
+</ul>
+{% endblock %}

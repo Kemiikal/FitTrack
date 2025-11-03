@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard</h2>
+<p>Today's calories: <strong>{{ total_cal }}</strong> kcal</p>
+<a class="btn btn-outline-primary" href="{{ url_for('meals') }}">Manage meals</a>
+<hr>
+<h4>Recent meals</h4>
+<ul class="list-group">
+  {% for m in meals %}
+    <li class="list-group-item">{{ m.date }} — {{ m.name }} — {{ m.calories }} kcal</li>
+  {% else %}
+    <li class="list-group-item">No meals yet</li>
+  {% endfor %}
+</ul>
+{% endblock %}
