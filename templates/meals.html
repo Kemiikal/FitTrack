@@ -14,7 +14,18 @@
 <h4>Recent meals</h4>
 <ul class="list-group">
   {% for m in meals %}
-    <li class="list-group-item">{{ m.date }} — {{ m.name }} — {{ m.calories }} kcal</li>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        {{ m.date }} — <strong>{{ m.name }}</strong> — {{ m.calories }} kcal
+        <div class="text-muted small">P: {{ m.protein }}g · C: {{ m.carbs }}g · F: {{ m.fats }}g</div>
+      </div>
+      <div>
+        <a href="{{ url_for('edit_meal', meal_id=m.id) }}" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+    <form action="{{ url_for('delete_meal', meal_id=m.id) }}" method="POST" style="display:inline;" class="confirm-delete" data-item-name="{{ m.name }}">
+      <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+    </form>
+      </div>
+    </li>
   {% else %}
     <li class="list-group-item">No meals yet</li>
   {% endfor %}

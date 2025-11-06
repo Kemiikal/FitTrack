@@ -3,12 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import date
 
 app = Flask(__name__)
-app.secret_key = "replace_with_a_random_secret"
+app.secret_key = "FitTrack_is_the_best!"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fittrack.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# --- Models ---
+# Models 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -24,7 +24,7 @@ class Meal(db.Model):
     fats = db.Column(db.Float, default=0)
     date = db.Column(db.Date, default=date.today)
 
-# --- Routes ---
+# Routes 
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -85,6 +85,36 @@ def meals():
         return redirect(url_for('meals'))
     meals = Meal.query.filter_by(user_id=session['user_id']).order_by(Meal.date.desc()).all()
     return render_template('meals.html', meals=meals)
+
+@app.route('/edit_meal/<int:meal_id>', methods=['GET', 'POST'])
+def edit_meal(meal_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    meal = Meal.query.get_or_404(meal_id)  
+
+    if request.method == 'POST':
+        meal.name = request.form['name']
+        meal.calories = int(request.form['calories'] or 0)
+        meal.protein = float(request.form['protein'] or 0)
+        meal.carbs = float(request.form['carbs'] or 0)
+        meal.fats = float(request.form['fats'] or 0)
+        db.session.commit()
+        flash('Meal updated successfully.')
+        return redirect(url_for('meals'))
+
+    return render_template('edit_meal.html', meal=meal)
+
+@app.route('/delete_meal/<int:meal_id>', methods=['POST'])
+def delete_meal(meal_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    meal = Meal.query.get_or_404(meal_id)
+    db.session.delete(meal)
+    db.session.commit()
+    flash('Meal deleted successfully.')
+    return redirect(url_for('meals'))
 
 @app.route('/logout')
 def logout():
