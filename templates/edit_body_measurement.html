@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Body Measurement</h2>
+
+<form method="POST" class="mb-4">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label for="date" class="form-label">Date</label>
+      <input type="date" name="date" id="date" class="form-control" value="{{ measurement.date.isoformat() }}" required>
+    </div>
+    <div class="col-md-6">
+      <label for="weight" class="form-label">Weight (kg)</label>
+      <input type="number" name="weight" id="weight" class="form-control" step="0.1" min="0" value="{{ measurement.weight if measurement.weight else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label for="body_fat_percentage" class="form-label">Body Fat Percentage (%)</label>
+      <input type="number" name="body_fat_percentage" id="body_fat_percentage" class="form-control" step="0.1" min="0" max="100" value="{{ measurement.body_fat_percentage if measurement.body_fat_percentage else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label for="chest" class="form-label">Chest Circumference (cm)</label>
+      <input type="number" name="chest" id="chest" class="form-control" step="0.1" min="0" value="{{ measurement.chest if measurement.chest else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label for="waist" class="form-label">Waist Circumference (cm)</label>
+      <input type="number" name="waist" id="waist" class="form-control" step="0.1" min="0" value="{{ measurement.waist if measurement.waist else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label for="hips" class="form-label">Hips Circumference (cm)</label>
+      <input type="number" name="hips" id="hips" class="form-control" step="0.1" min="0" value="{{ measurement.hips if measurement.hips else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label for="biceps" class="form-label">Biceps Circumference (cm)</label>
+      <input type="number" name="biceps" id="biceps" class="form-control" step="0.1" min="0" value="{{ measurement.biceps if measurement.biceps else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label for="thighs" class="form-label">Thighs Circumference (cm)</label>
+      <input type="number" name="thighs" id="thighs" class="form-control" step="0.1" min="0" value="{{ measurement.thighs if measurement.thighs else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label for="neck" class="form-label">Neck Circumference (cm)</label>
+      <input type="number" name="neck" id="neck" class="form-control" step="0.1" min="0" value="{{ measurement.neck if measurement.neck else '' }}">
+    </div>
+    <div class="col-md-12">
+      <label for="notes" class="form-label">Notes (optional)</label>
+      <textarea name="notes" id="notes" class="form-control" rows="3">{{ measurement.notes if measurement.notes else '' }}</textarea>
+    </div>
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Update Measurement</button>
+      <a href="{{ url_for('analytics') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </div>
+</form>
+
+{% endblock %}
+

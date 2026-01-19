@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Notifications</h2>
+<div class="mb-3">
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" id="select-all-notifications">
+    <label class="form-check-label" for="select-all-notifications">Select All</label>
+  </div>
+  <button id="bulk-delete-notification-btn" class="btn btn-outline-danger btn-sm" style="display:none;">Delete Selected</button>
+</div>
+<ul class="list-group">
+  {% for n in notifications %}
+    <li class="list-group-item {% if not n.is_read %}list-group-item-info{% endif %}">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <input type="checkbox" name="notification_ids" value="{{ n.id }}" class="form-check-input me-3 notification-checkbox">
+          <div>
+            <span>{{ n.message }}</span>
+            <div class="text-muted small">{{ n.local_created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+          </div>
+        </div>
+      </div>
+    </li>
+  {% else %}
+    <li class="list-group-item">No notifications</li>
+  {% endfor %}
+</ul>
+<form id="bulk-delete-notification-form" method="post" action="{{ url_for('bulk_delete_notifications') }}" style="display:none;">
+  
+</form>
+<div class="mt-3">
+  <button id="send-test-notif" class="btn btn-outline-primary">Send test notification</button>
+</div>
+
+<script>
+document.getElementById('send-test-notif').addEventListener('click', function(){
+  fetch('/notifications/test', {method: 'POST'})
+    .then(r => r.json())
+    .then(d => {
+      
+      if (typeof pollNotifications === 'function') pollNotifications();
+      alert('Test notification created');
+    }).catch(err => alert('Error creating test notification'));
+});
+</script>
+{% endblock %}

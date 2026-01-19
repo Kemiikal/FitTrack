@@ -1,28 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Meal</title>
-</head>
-<body>
-    <h1>Edit Meal</h1>
-    <form method="POST">
-        <label>Name:</label>
-        <input type="text" name="name" value="{{ meal.name }}" required><br>
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Meal</h2>
+<form method="POST" class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" value="{{ meal.name }}" class="form-control" required>
+    </div>
 
-        <label>Calories:</label>
-        <input type="number" name="calories" value="{{ meal.calories }}" required><br>
+    <div class="col-md-6">
+        <label class="form-label">Calories</label>
+        <input type="number" name="calories" value="{{ meal.calories }}" min="0" step="1" class="form-control" required>
+    </div>
 
-        <label>Protein:</label>
-        <input type="number" step="0.1" name="protein" value="{{ meal.protein }}"><br>
+    <div class="col-md-4">
+        <label class="form-label">Protein (g)</label>
+        <input type="number" name="protein" value="{{ meal.protein }}" min="0" step="0.1" class="form-control">
+    </div>
 
-        <label>Carbs:</label>
-        <input type="number" step="0.1" name="carbs" value="{{ meal.carbs }}"><br>
+    <div class="col-md-4">
+        <label class="form-label">Carbs (g)</label>
+        <input type="number" name="carbs" value="{{ meal.carbs }}" min="0" step="0.1" class="form-control">
+    </div>
 
-        <label>Fats:</label>
-        <input type="number" step="0.1" name="fats" value="{{ meal.fats }}"><br>
+    <div class="col-md-4">
+        <label class="form-label">Fats (g)</label>
+        <input type="number" name="fats" value="{{ meal.fats }}" min="0" step="0.1" class="form-control">
+    </div>
 
-        <button type="submit">Save Changes</button>
-    </form>
-    <a href="{{ url_for('meals') }}">Back</a>
-</body>
-</html>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{{ url_for('meals') }}" class="btn btn-outline-secondary">Back</a>
+    </div>
+</form>
+{% endblock %}

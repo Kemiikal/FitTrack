@@ -1,33 +1,208 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Meals</h2>
+
 <form method="post" class="row g-3">
-  <div class="col-md-6"><input name="name" placeholder="Meal name" class="form-control" required></div>
-  <div class="col-md-2"><input name="calories" placeholder="Calories" class="form-control" required></div>
-  <div class="col-md-2"><input name="protein" placeholder="Protein (g)" class="form-control"></div>
-  <div class="col-md-2"><input name="carbs" placeholder="Carbs (g)" class="form-control"></div>
-  <div class="col-md-2"><input name="fats" placeholder="Fats (g)" class="form-control"></div>
+  <div class="col-md-6">
+    <div class="input-group">
+      <input name="name" id="meal-name-input" placeholder="Meal name" class="form-control" required>
+      <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#selectMealModal">Select Meal</button>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <input name="calories" type="number" min="0" step="1" placeholder="Calories" class="form-control" required>
+  </div>
+  <div class="col-md-2">
+    <input name="protein" type="number" min="0" step="0.1" placeholder="Protein (g)" class="form-control">
+  </div>
+  <div class="col-md-2">
+    <input name="carbs" type="number" min="0" step="0.1" placeholder="Carbs (g)" class="form-control">
+  </div>
+  <div class="col-md-2">
+    <input name="fats" type="number" min="0" step="0.1" placeholder="Fats (g)" class="form-control">
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Quantity</label>
+    <div class="input-group">
+      <button type="button" class="btn btn-outline-secondary" id="decrease-quantity">-</button>
+      <input type="number" id="quantity-input" name="quantity" value="1" min="1" class="form-control">
+      <button type="button" class="btn btn-outline-secondary" id="increase-quantity">+</button>
+    </div>
+  </div>
   <div class="col-12"><button class="btn btn-primary">Add meal</button></div>
 </form>
 
+
+<div class="modal fade" id="selectMealModal" tabindex="-1" aria-labelledby="selectMealLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="selectMealLabel">Select Meal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="meal-search" class="form-control mb-3" placeholder="Search meals...">
+        <div id="meal-list" class="list-group" style="max-height: 300px; overflow-y: auto;">
+          {% if suggestions %}
+            {% for f in suggestions %}
+              <button type="button" class="list-group-item list-group-item-action meal-option {% if f.is_favorite %}favorite-meal{% endif %}"
+                      data-name="{{ f.name }}"
+                      data-calories="{{ f.calories }}"
+                      data-protein="{{ f.protein }}"
+                      data-carbs="{{ f.carbs }}"
+                      data-fats="{{ f.fats }}"
+                      data-is-favorite="{% if f.is_favorite %}true{% else %}false{% endif %}">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>{{ f.name }}</strong>
+                    <div class="small text-muted">{{ f.calories }} kcal</div>
+                    {% if f.protein or f.carbs or f.fats %}
+                      <div class="small text-muted">
+                        {% if f.protein %}P: {{ f.protein }}g {% endif %}
+                        {% if f.carbs %}C: {{ f.carbs }}g {% endif %}
+                        {% if f.fats %}F: {{ f.fats }}g{% endif %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div>
+                    {% if f.is_favorite %}
+                      <span class="badge bg-warning text-dark">★ Favorite</span>
+                    {% elif f.frequency %}
+                      <span class="badge bg-secondary">Used {{ f.frequency }}x</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </button>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted">No suggestions available.</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="mt-3 mb-3">
+  <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#manageFavoritesModal">Manage favorites</button>
+  <button class="btn btn-outline-secondary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#manageSuggestionsModal">Manage suggestions</button>
+</div>
+
+
+<div class="modal fade" id="manageFavoritesModal" tabindex="-1" aria-labelledby="manageFavoritesLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="manageFavoritesLabel">Manage favorites</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted">Remove favorites you no longer want to see in the suggestions.</p>
+        <div class="list-group">
+          {% for f in favorites %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ f.name }}</strong>
+                <div class="small text-muted">{{ f.calories }} kcal</div>
+              </div>
+              <form method="post" action="{{ url_for('toggle_favorite_meal', meal_id=f.id) }}" class="remove-template" data-item-name="{{ f.name }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+              </form>
+            </div>
+          {% else %}
+            <p class="text-muted">No favorites yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="manageSuggestionsModal" tabindex="-1" aria-labelledby="manageSuggestionsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="manageSuggestionsLabel">Manage suggestions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted">Remove frequently entered meals you no longer want to see in the suggestions.</p>
+        <div class="list-group">
+          {% for s in suggestions %}
+            {% if not s.is_favorite %}
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ s.name }}</strong>
+                  <div class="small text-muted">{{ s.calories }} kcal</div>
+                  {% if s.frequency %}
+                    <div class="small text-muted">Used {{ s.frequency }} times</div>
+                  {% endif %}
+                </div>
+                <form method="post" action="{{ url_for('remove_template', template_id=s.id) }}" class="remove-template" data-item-name="{{ s.name }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                </form>
+              </div>
+            {% endif %}
+          {% else %}
+            <p class="text-muted">No suggestions to manage.</p>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <hr>
 <h4>Recent meals</h4>
+<div class="mb-3">
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" id="select-all">
+    <label class="form-check-label" for="select-all">Select All</label>
+  </div>
+  <button id="bulk-delete-btn" class="btn btn-outline-danger btn-sm" style="display:none;">Delete Selected</button>
+</div>
 <ul class="list-group">
   {% for m in meals %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <div>
-        {{ m.date }} — <strong>{{ m.name }}</strong> — {{ m.calories }} kcal
-        <div class="text-muted small">P: {{ m.protein }}g · C: {{ m.carbs }}g · F: {{ m.fats }}g</div>
+      <div class="d-flex align-items-center">
+        <input type="checkbox" name="meal_ids" value="{{ m.id }}" class="form-check-input me-3 meal-checkbox">
+        <div>
+          {{ m.date }} — <strong>{{ m.name }}</strong> (x{{ m.quantity }}) — {{ m.calories }} kcal
+          <div class="text-muted small">
+            Protein: {{ m.protein|int if m.protein == m.protein|int else '%.1f'|format(m.protein) }}g · 
+            Carbs: {{ m.carbs|int if m.carbs == m.carbs|int else '%.1f'|format(m.carbs) }}g · 
+            Fats: {{ m.fats|int if m.fats == m.fats|int else '%.1f'|format(m.fats) }}g
+          </div>
+        </div>
       </div>
       <div>
+        <form action="{{ url_for('toggle_favorite_meal', meal_id=m.id) }}" method="POST" style="display:inline;">
+          <button type="submit" class="btn btn-sm {% if m.is_favorite %}btn-warning{% else %}btn-outline-warning{% endif %}">
+            {% if m.is_favorite %}★ Unfavorite{% else %}☆ Favorite{% endif %}
+          </button>
+        </form>
         <a href="{{ url_for('edit_meal', meal_id=m.id) }}" class="btn btn-sm btn-outline-primary me-2">Edit</a>
-    <form action="{{ url_for('delete_meal', meal_id=m.id) }}" method="POST" style="display:inline;" class="confirm-delete" data-item-name="{{ m.name }}">
-      <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-    </form>
+        <form action="{{ url_for('delete_meal', meal_id=m.id) }}" method="POST" style="display:inline;" class="confirm-delete" data-item-name="{{ m.name }}">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
       </div>
     </li>
   {% else %}
     <li class="list-group-item">No meals yet</li>
   {% endfor %}
 </ul>
+<form id="bulk-delete-form" method="post" action="{{ url_for('bulk_delete_meals') }}" style="display:none;">
+  
+</form>
 {% endblock %}

@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Progress Analytics</h2>
+
+
+<ul class="nav nav-tabs mb-4" id="analyticsTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="graphs-tab" data-bs-toggle="tab" data-bs-target="#graphs" type="button" role="tab">
+      Graphs & Statistics
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab">
+      Progress Reports
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="measurements-tab" data-bs-toggle="tab" data-bs-target="#measurements" type="button" role="tab">
+      Body Measurements
+    </button>
+  </li>
+</ul>
+
+
+<div class="tab-content" id="analyticsTabContent">
+  
+  <div class="tab-pane fade show active" id="graphs" role="tabpanel">
+    
+    <div class="row">
+      <div class="col-md-12 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5>Calories Over Time (7 days)</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="caloriesChart" style="max-height: 400px;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="row">
+      <div class="col-md-12 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5>Macronutrient Breakdown (Today)</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-8">
+                <canvas id="macrosChart" style="max-height: 400px;"></canvas>
+              </div>
+              <div class="col-md-4 d-flex flex-column justify-content-center">
+                <div class="mb-3">
+                  <h6 class="mb-1">Protein Intake</h6>
+                  <div class="d-flex justify-content-between small text-muted mb-1">
+                    <div>Today: <strong>{{ protein_today_grams|round(1) }} g</strong></div>
+                    <div>Target: <strong>{{ protein_target_grams|round(1) }} g</strong></div>
+                  </div>
+                  <div class="progress" style="height: 18px;">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ protein_target_pct }}%;" aria-valuenow="{{ protein_target_pct }}" aria-valuemin="0" aria-valuemax="100">
+                      {{ protein_target_pct }}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="row">
+      <div class="col-md-12 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5>Weight Over Time</h5>
+          </div>
+          <div class="card-body">
+            {% if weight_chart_data.dates %}
+            <canvas id="weightChart" style="max-height: 400px;"></canvas>
+            {% else %}
+            <div class="text-center p-4" style="min-height: 400px; background-color: #f8f9fa; border-radius: 4px;">
+              <p class="text-muted">No weight data available</p>
+              <p class="small text-muted">Add body measurements to track your weight over time</p>
+              <a href="{{ url_for('add_body_measurement') }}" class="btn btn-primary mt-2">Add Measurement</a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="row">
+      <div class="col-md-12 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5>Workout Volume Trend (last 30 days)</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div><strong>Total Volume (30d):</strong> <span class="fw-bold">{{ workout_total_volume|int }}</span></div>
+              <div><strong>Avg / day:</strong> <span class="fw-bold">{{ workout_avg_volume }}</span></div>
+            </div>
+            <canvas id="workoutVolumeChart" style="max-height: 240px;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="tab-pane fade" id="reports" role="tabpanel">
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h5>Weekly Report</h5>
+          </div>
+          <div class="card-body">
+            <p><strong>Calories Burned:</strong> {{ weekly_calories_burned }} kcal</p>
+            <p><strong>Calories Consumed:</strong> {{ weekly_calories_consumed }} kcal</p>
+            <p><strong>Net Calories:</strong> {{ weekly_calories_consumed - weekly_calories_burned }} kcal</p>
+            <hr>
+            <p><strong>Workout Volume (this week):</strong> {{ weekly_workout_volume }}</p>
+            <p><strong>Previous Week Volume:</strong> {{ prev_week_volume }}</p>
+            <p><strong>Volume Trend:</strong> <span class="fw-bold text-{{ 'success' if volume_trend=='increased' else ('danger' if volume_trend=='decreased' else 'muted') }}">{{ volume_trend.title() }}</span></p>
+            <hr>
+            <p><strong>Macro Ratios % of Calories (this week):</strong></p>
+            <p>Protein: {{ weekly_prot_pct }}% · Carbs: {{ weekly_carb_pct }}% · Fats: {{ weekly_fat_pct }}%</p>
+            <p><strong>Consistency Trend:</strong> <span class="fw-bold text-{{ 'success' if consistency_trend=='increased' else ('danger' if consistency_trend=='decreased' else 'muted') }}">{{ consistency_trend.title() }}</span></p>
+            <hr>
+            <div class="text-center p-3" style="background-color: #f8f9fa; border-radius: 4px;">
+              <p class="text-muted small">Detailed weekly breakdown will be displayed here</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            <h5>Monthly Report</h5>
+          </div>
+          <div class="card-body">
+            <p><strong>Calories Burned:</strong> {{ monthly_calories_burned }} kcal</p>
+            <p><strong>Calories Consumed:</strong> {{ monthly_calories_consumed }} kcal</p>
+            <p><strong>Net Calories:</strong> {{ monthly_calories_consumed - monthly_calories_burned }} kcal</p>
+            <hr>
+            <h6 class="mb-2">Logging Consistency</h6>
+            <div class="mb-2 small text-muted d-flex justify-content-between">
+              <div>Days logged: <strong>{{ monthly_days_logged }}</strong> / <strong>{{ month_period_days }}</strong></div>
+              <div>Current: <strong>{{ monthly_logged_pct }}%</strong> · Prev: <strong>{{ previous_month_logged_pct }}%</strong></div>
+            </div>
+            <div class="progress mb-2" style="height: 18px;">
+              <div class="progress-bar {{ 'bg-danger' if consistency_alert else 'bg-success' }}" role="progressbar" style="width: {{ monthly_logged_pct }}%;" aria-valuenow="{{ monthly_logged_pct }}" aria-valuemin="0" aria-valuemax="100">{{ monthly_logged_pct }}%</div>
+            </div>
+            {% if consistency_alert %}
+            <div class="alert alert-warning p-2 mt-2" role="alert">
+              <strong>Consistency dropped</strong> — logging decreased by {{ consistency_drop_pct }} percentage points vs previous month.
+            </div>
+            {% endif %}
+            <div class="text-center p-3" style="background-color: #f8f9fa; border-radius: 4px;">
+              <p class="text-muted small">Detailed monthly breakdown will be displayed here</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="tab-pane fade" id="measurements" role="tabpanel">
+    <div class="mb-3">
+      <a href="{{ url_for('user_profile') }}" class="btn btn-outline-primary me-2">Edit Profile</a>
+      <a href="{{ url_for('add_body_measurement') }}" class="btn btn-primary">Add Measurement</a>
+    </div>
+
+    
+    {% if user_profile %}
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5>Profile Information</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3"><strong>Height:</strong> {% if user_profile.height %}{{ user_profile.height }} cm{% else %}Not set{% endif %}</div>
+          <div class="col-md-3"><strong>Age:</strong> {% if user_profile.age %}{{ user_profile.age }}{% else %}Not set{% endif %}</div>
+          <div class="col-md-3"><strong>Gender:</strong> {% if user_profile.gender %}{{ user_profile.gender|title }}{% else %}Not set{% endif %}</div>
+          <div class="col-md-3"><strong>Activity Level:</strong> {% if user_profile.physical_activity_level %}{{ user_profile.physical_activity_level|replace('_', ' ')|title }}{% else %}Not set{% endif %}</div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+      <strong>Profile not set up.</strong> <a href="{{ url_for('user_profile') }}">Set up your profile</a> to track body measurements effectively.
+    </div>
+    {% endif %}
+
+    
+    <div class="card">
+      <div class="card-header">
+        <h5>Body Measurements History</h5>
+      </div>
+      <div class="card-body">
+        {% if body_measurements %}
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Weight (kg)</th>
+              
+                <th>Body Fat %</th>
+                <th>Chest (cm)</th>
+                <th>Waist (cm)</th>
+                <th>Hips (cm)</th>
+                <th>Biceps (cm)</th>
+                <th>Thighs (cm)</th>
+                <th>Neck (cm)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for measurement in body_measurements %}
+              <tr>
+                <td>{{ measurement.date.strftime('%Y-%m-%d') }}</td>
+                <td>{% if measurement.weight %}{{ "%.1f"|format(measurement.weight) }}{% else %}-{% endif %}</td>
+                <td>{% if measurement.body_fat_percentage %}{{ "%.1f"|format(measurement.body_fat_percentage) }}%{% else %}-{% endif %}</td>
+                <td>{% if measurement.chest %}{{ "%.1f"|format(measurement.chest) }}{% else %}-{% endif %}</td>
+                <td>{% if measurement.waist %}{{ "%.1f"|format(measurement.waist) }}{% else %}-{% endif %}</td>
+                <td>{% if measurement.hips %}{{ "%.1f"|format(measurement.hips) }}{% else %}-{% endif %}</td>
+                <td>{% if measurement.biceps %}{{ "%.1f"|format(measurement.biceps) }}{% else %}-{% endif %}</td>
+                <td>{% if measurement.thighs %}{{ "%.1f"|format(measurement.thighs) }}{% else %}-{% endif %}</td>
+                <td>{% if measurement.neck %}{{ "%.1f"|format(measurement.neck) }}{% else %}-{% endif %}</td>
+                <td>
+                  <a href="{{ url_for('edit_body_measurement', measurement_id=measurement.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                  <form action="{{ url_for('delete_body_measurement', measurement_id=measurement.id) }}" method="POST" style="display:inline;" class="confirm-delete" data-item-name="measurement">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No body measurements recorded yet. <a href="{{ url_for('add_body_measurement') }}">Add your first measurement</a></p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+
+const caloriesCtx = document.getElementById('caloriesChart');
+if (caloriesCtx) {
+  const caloriesData = {
+    labels: {{ calories_chart_data.dates|tojson }},
+    datasets: [
+      {
+        label: 'Calories Consumed',
+        data: {{ calories_chart_data.consumed|tojson }},
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.1
+      },
+      {
+        label: 'Calories Burned',
+        data: {{ calories_chart_data.burned|tojson }},
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        tension: 0.1
+      },
+      {
+        label: 'Net Calories',
+        data: {{ calories_chart_data.net|tojson }},
+        borderColor: 'rgb(54, 162, 235)',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        tension: 0.1,
+        borderDash: [5, 5]
+      }
+    ]
+  };
+  
+  new Chart(caloriesCtx, {
+    type: 'line',
+    data: caloriesData,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Calories'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Date'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top'
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      }
+    }
+  });
+}
+
+
+const volumeCtx = document.getElementById('workoutVolumeChart');
+if (volumeCtx) {
+  const volumeData = {
+    labels: {{ workout_volume_chart_data.dates|tojson }},
+    datasets: [
+      {
+        label: 'Workout Volume (sets×reps×weight)',
+        data: {{ workout_volume_chart_data.volumes|tojson }},
+        borderColor: 'rgb(54, 162, 235)',
+        backgroundColor: 'rgba(54, 162, 235, 0.15)',
+        tension: 0.2,
+        fill: true
+      }
+    ]
+  };
+
+  new Chart(volumeCtx, {
+    type: 'line',
+    data: volumeData,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Volume (sets × reps × kg)'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Date'
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+
+const macrosCtx = document.getElementById('macrosChart');
+if (macrosCtx) {
+  const macrosData = {
+    labels: ['Protein', 'Carbs', 'Fats'],
+    datasets: [{
+      data: [
+        {{ daily_macros.protein|round(1) }},
+        {{ daily_macros.carbs|round(1) }},
+        {{ daily_macros.fats|round(1) }}
+      ],
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)'
+      ],
+      borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)'
+      ],
+      borderWidth: 2
+    }]
+  };
+  
+  new Chart(macrosCtx, {
+    type: 'pie',
+    data: macrosData,
+    options: {
+      plugins: {
+        legend: {
+          display: true,
+          position: 'right'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let label = context.label || '';
+              if (label) {
+                label += ': ';
+              }
+              const value = context.parsed || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+              label += value.toFixed(1) + ' g (' + percentage + '%)';
+              return label;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+
+const weightCtx = document.getElementById('weightChart');
+if (weightCtx) {
+  const weightData = {
+    labels: {{ weight_chart_data.dates|tojson }},
+    datasets: [{
+      label: 'Weight (kg)',
+      data: {{ weight_chart_data.weights|tojson }},
+      borderColor: 'rgb(255, 159, 64)',
+      backgroundColor: 'rgba(255, 159, 64, 0.2)',
+      tension: 0.1,
+      pointRadius: 5,
+      pointHoverRadius: 7
+    }]
+  };
+  
+  new Chart(weightCtx, {
+    type: 'line',
+    data: weightData,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: false,
+          title: {
+            display: true,
+            text: 'Weight (kg)'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Date'
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: function(context) {
+              return 'Weight: ' + context.parsed.y.toFixed(1) + ' kg';
+            }
+          }
+        }
+      }
+    }
+  });
+}
+</script>
+
+{% endblock %}
+

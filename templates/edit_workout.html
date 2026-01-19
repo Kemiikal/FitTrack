@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Workout</h2>
+
+<form method="POST" class="mb-4">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label for="name" class="form-label">Exercise Name</label>
+      <input type="text" name="name" id="name" class="form-control" value="{{ workout.name }}" required>
+    </div>
+    {% if workout.exercise_type == 'cardio' %}
+    <div class="col-md-3">
+      <label for="duration" class="form-label">Duration (minutes)</label>
+      <input type="number" name="duration" id="duration" class="form-control" value="{{ workout.duration }}" min="1" required>
+    </div>
+    {% else %}
+    <div class="col-md-3">
+      <label for="sets" class="form-label">Sets</label>
+      <input type="number" name="sets" id="sets" class="form-control" value="{{ workout.sets }}" min="1" required>
+    </div>
+    <div class="col-md-3">
+      <label for="reps" class="form-label">Reps</label>
+      <input type="number" name="reps" id="reps" class="form-control" value="{{ workout.reps }}" min="1" required>
+    </div>
+    <div class="col-md-3">
+      <label for="weight" class="form-label">Weight (kg)</label>
+      <input type="number" name="weight" id="weight" class="form-control" value="{{ workout.weight or 0 }}" min="0" step="0.1" required>
+      <div class="form-text">Enter 0 for bodyweight exercises.</div>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Volume</label>
+      <input type="text" class="form-control" value="{{ workout.volume }}" readonly>
+    </div>
+    {% endif %}
+    <div class="col-md-3">
+      <label for="intensity" class="form-label">Intensity</label>
+      <select name="intensity" id="intensity" class="form-control">
+        <option value="0.5" {% if workout.intensity == 0.5 %}selected{% endif %}>Low: Slow pace, long rests (0.5x)</option>
+        <option value="0.75" {% if workout.intensity == 0.75 %}selected{% endif %}>Moderate: Normal pace, regular rests (0.75x)</option>
+        <option value="0.9" {% if workout.intensity == 0.9 %}selected{% endif %}>High: Strong pace, short rests (0.9x)</option>
+        <option value="1.0" {% if workout.intensity == 1.0 %}selected{% endif %}>Very High: Fast pace, minimal rest, near-max effort (1.0x)</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Calories Burned</label>
+      <input type="text" class="form-control" value="{{ workout.calories_burned }} kcal" readonly>
+    </div>
+    <div class="col-md-6">
+      <button type="submit" class="btn btn-primary">Update Workout</button>
+      <a href="{{ url_for('workouts') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

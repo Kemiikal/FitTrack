@@ -1,15 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Dashboard</h2>
-<p>Today's calories: <strong>{{ total_cal }}</strong> kcal</p>
-<a class="btn btn-outline-primary" href="{{ url_for('meals') }}">Manage meals</a>
+<div class="row">
+  <div class="col-md-6">
+    <h4>Meals</h4>
+    <p>Today's calories: <strong>{{ total_cal }}</strong> kcal</p>
+    <p>Meals logged today: <strong>{{ meals_count }}</strong></p>
+    <p>Calories this week: <strong>{{ weekly_cal }}</strong> kcal</p>
+    <a class="btn btn-outline-primary" href="{{ url_for('meals') }}">Manage meals</a>
+  </div>
+  <div class="col-md-6">
+    <h4>Workouts</h4>
+    <p>Today's calories burned: <strong>{{ workout_cal }}</strong> kcal</p>
+    <p>Workouts logged today: <strong>{{ workouts_count }}</strong></p>
+    <p>Calories burned this week: <strong>{{ weekly_workout_cal }}</strong> kcal</p>
+    <a class="btn btn-outline-success" href="{{ url_for('workouts') }}">Manage workouts</a>
+  </div>
+</div>
 <hr>
-<h4>Recent meals</h4>
-<ul class="list-group">
-  {% for m in meals %}
-    <li class="list-group-item">{{ m.date }} — {{ m.name }} — {{ m.calories }} kcal</li>
-  {% else %}
-    <li class="list-group-item">No meals yet</li>
-  {% endfor %}
-</ul>
+<h4>Recent activity</h4>
+<p class="text-muted">This dashboard summarizes your progress. See <a href="{{ url_for('meals') }}">Meals</a> and <a href="{{ url_for('workouts') }}">Workouts</a> for the full logs.</p>
 {% endblock %}

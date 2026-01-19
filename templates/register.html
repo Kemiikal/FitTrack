@@ -10,6 +10,24 @@
     <label>Password</label>
     <input name="password" type="password" class="form-control" required>
   </div>
+  <div class="mb-3">
+    <label>Confirm Password</label>
+    <input name="confirm_password" type="password" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Security Question</label>
+    <select name="security_question" class="form-control" required>
+      <option value="maiden_name">What is your mother's maiden name?</option>
+      <option value="pet">What was your first pet's name?</option>
+      <option value="city">What city were you born in?</option>
+      <option value="school">What was your first school's name?</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <label>Security Answer</label>
+    <input name="security_answer" class="form-control" required>
+    <div class="form-text">You'll need this to reset your password if you forget it.</div>
+  </div>
   <button class="btn btn-success" type="submit">Register</button>
 </form>
 {% endblock %}

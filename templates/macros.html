@@ -1,0 +1,29 @@
+{% macro should_show_back_button() %}
+  {% if request.endpoint == 'dashboard' %}
+    {{ false }}
+  {% elif request.endpoint == 'index' %}
+    {{ false }}
+  {% else %}
+    {{ true }}
+  {% endif %}
+{% endmacro %}
+
+{% macro get_back_url() %}
+  {% if request.endpoint == 'meals' %}
+    {{ url_for('dashboard') }}
+  {% elif request.endpoint == 'edit_meal' %}
+    {{ url_for('meals') }}
+  {% elif request.endpoint == 'register' %}
+    {{ url_for('index') }}
+  {% elif request.endpoint == 'login' %}
+    {{ url_for('index') }}
+  {% elif request.endpoint == 'reset_password' %}
+    {{ url_for('login') }}
+  {% elif request.endpoint == 'analytics' %}
+    {{ url_for('dashboard') }}
+  {% elif request.endpoint in ['add_body_measurement', 'edit_body_measurement', 'user_profile'] %}
+    {{ url_for('analytics') }}
+  {% else %}
+    {{ url_for('dashboard') if session.get('user_id') else url_for('index') }}
+  {% endif %}
+{% endmacro %}

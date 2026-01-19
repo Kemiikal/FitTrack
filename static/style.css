@@ -1,2 +1,69 @@
-body { background: #f8f9fa; }
+body { background: #f8f9fa; position: relative; }
 .container { max-width: 900px; }
+
+
+.floating-back-btn {
+    position: absolute;
+    left: 20px;
+    top: 75px;
+    z-index: 1050; 
+    border-radius: .375rem;
+    padding: .4rem 1.5rem;
+    font-size: .875rem;
+    line-height: 1.5;
+    background-color: transparent !important;
+    color: #212529 !important;
+    border: 1px solid #212529;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.floating-back-btn:hover {
+    background-color: #212529 !important;
+    color: #fff !important;
+}
+
+@media (max-width: 576px) {
+	.floating-back-btn {
+		left: 10px;
+		top: 64px;
+		padding: .30rem .5rem;
+	}
+}
+
+
+.favorite-meal {
+    background-color: #fff3cd !important;
+    border-color: #ffeaa7 !important;
+}
+
+.favorite-meal:hover {
+    background-color: #ffeaa7 !important;
+}
+
+
+.form-check-input {
+    width: 1.2em !important;
+    height: 1.2em !important;
+    border: 2px solid #0d6efd !important;
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+
+.logout-btn {
+    background-color: #f31703 !important;
+    color: white !important;
+    border: 1px solid #e8e0dfd7;
+    padding: 5px 15px;
+    border-radius: 5px; 
+    font-size: 14px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #f08585 !important;
+    border-color: #d7141481;
+}

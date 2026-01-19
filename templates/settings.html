@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Settings</h2>
+
+<div class="row">
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h5>Personal Information</h5>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('settings') }}">
+          <input type="hidden" name="action" value="update_personal">
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input class="form-control" name="username" value="{{ user.username }}">
+          </div>
+
+          <hr>
+          <h6>Change Password</h6>
+          <div class="mb-3">
+            <label class="form-label">Current Password</label>
+            <input type="password" class="form-control" name="current_password">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">New Password</label>
+            <input type="password" class="form-control" name="new_password">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" class="form-control" name="confirm_password">
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-primary" type="submit">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h5>Notifications</h5>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('settings') }}">
+          <input type="hidden" name="action" value="update_notifications">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="workout_reminder" id="workout_reminder" value="1" {% if user.workout_reminder %}checked{% endif %}>
+            <label class="form-check-label" for="workout_reminder">Workout reminders</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="meal_reminder" id="meal_reminder" value="1" {% if user.meal_reminder %}checked{% endif %}>
+            <label class="form-check-label" for="meal_reminder">Meal logging reminders</label>
+          </div>
+
+          <div class="mb-3 mt-3">
+            <label class="form-label">Progress summary frequency</label>
+            <select class="form-select" name="progress_summary_frequency">
+              <option value="daily" {% if user.progress_summary_frequency=='daily' %}selected{% endif %}>Daily</option>
+              <option value="weekly" {% if user.progress_summary_frequency=='weekly' %}selected{% endif %}>Weekly</option>
+              <option value="monthly" {% if user.progress_summary_frequency=='monthly' %}selected{% endif %}>Monthly</option>
+              <option value="none" {% if user.progress_summary_frequency=='none' %}selected{% endif %}>None</option>
+            </select>
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-primary" type="submit">Save Notifications</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header bg-danger text-white">
+        <h5>Data Management</h5>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small">Clear logs or permanently remove your account. These actions cannot be undone.</p>
+        <form method="POST" action="{{ url_for('settings') }}" onsubmit="return confirm('Are you sure you want to clear all your logs? This cannot be undone.');">
+          <input type="hidden" name="action" value="clear_data">
+          <button class="btn btn-outline-danger mb-2" type="submit">Clear all logs (meals, workouts, measurements, notifications)</button>
+        </form>
+
+        <form method="POST" action="{{ url_for('settings') }}" onsubmit="return confirm('Are you sure you want to DELETE your account? This will remove all data and cannot be undone.');">
+          <input type="hidden" name="action" value="delete_account">
+          <button class="btn btn-danger" type="submit">Delete my account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
