@@ -76,7 +76,6 @@ if (document.readyState === 'loading') {
     pollNotifications();
 }
 
-// Poll again after 12 seconds to catch delayed login notifications (sent 10 seconds after login)
 setTimeout(() => {
     console.log('[Notifications] Polling for delayed login notifications...');
     pollNotifications();
