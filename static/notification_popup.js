@@ -29,10 +29,6 @@ function showNotification(message, id) {
     closeBtn.onclick = function() {
         removeNotification(notifBox, id);
     };
-    
-    setTimeout(() => {
-        removeNotification(notifBox, id);
-    }, 8000);
 }
 
 function removeNotification(notifBox, id) {

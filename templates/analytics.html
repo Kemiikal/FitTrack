@@ -64,6 +64,30 @@
                     </div>
                   </div>
                 </div>
+                <div class="mb-3">
+                  <h6 class="mb-1">Carbs Intake</h6>
+                  <div class="d-flex justify-content-between small text-muted mb-1">
+                    <div>Today: <strong>{{ carb_today_grams|round(1) }} g</strong></div>
+                    <div>Target: <strong>{{ carb_target_grams|round(1) }} g</strong></div>
+                  </div>
+                  <div class="progress" style="height: 18px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ carb_target_pct }}%;" aria-valuenow="{{ carb_target_pct }}" aria-valuemin="0" aria-valuemax="100">
+                      {{ carb_target_pct }}%
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <h6 class="mb-1">Fats Intake</h6>
+                  <div class="d-flex justify-content-between small text-muted mb-1">
+                    <div>Today: <strong>{{ fat_today_grams|round(1) }} g</strong></div>
+                    <div>Target: <strong>{{ fat_target_grams|round(1) }} g</strong></div>
+                  </div>
+                  <div class="progress" style="height: 18px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ fat_target_pct }}%;" aria-valuenow="{{ fat_target_pct }}" aria-valuemin="0" aria-valuemax="100">
+                      {{ fat_target_pct }}%
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

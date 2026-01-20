@@ -266,6 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const customDurationInput = document.getElementById('custom-duration');
     const customSetsInput = document.getElementById('custom-sets');
     const customRepsInput = document.getElementById('custom-reps');
+    const customWeightInput = document.getElementById('custom-weight');
     const customIntensityInput = document.getElementById('custom-intensity');
 
     if (saveCustomWorkoutBtn) {
@@ -277,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const duration = parseInt(document.getElementById('custom-duration').value) || 0;
             const sets = parseInt(document.getElementById('custom-sets').value) || 0;
             const reps = parseInt(document.getElementById('custom-reps').value) || 0;
-
+            const weight = parseFloat(document.getElementById('custom-weight').value) || 0;
             const intensity = parseFloat(document.getElementById('custom-intensity').value) || 1.0;
 
             if (!name || !type) {
@@ -328,13 +329,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelectorAll('.strength-only').forEach(el => el.style.display = 'block');
                 document.getElementById('sets').value = sets;
                 document.getElementById('reps').value = reps;
+                document.getElementById('weight').value = weight;
                 document.getElementById('duration').value = '';
                 
-                if (document.getElementById('weight')) {
-                    document.getElementById('weight').focus();
-                    alert('Please enter weight for this strength workout (enter 0 for bodyweight), then press Add Workout.');
-                    validateAddForm();
-                }
+                const form = document.getElementById('add-workout-btn').closest('form');
+                if (form) form.submit();
             }
 
             document.getElementById('intensity').value = intensity;
@@ -355,6 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('custom-duration').value = '';
             document.getElementById('custom-sets').value = '';
             document.getElementById('custom-reps').value = '';
+            document.getElementById('custom-weight').value = '';
             document.getElementById('custom-intensity').value = '1.0';
             document.querySelectorAll('.custom-cardio-fields, .custom-strength-fields').forEach(el => el.style.display = 'none');
         });

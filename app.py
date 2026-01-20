@@ -219,7 +219,7 @@ def _notification_exists_on_date(user_id, text_substr, when_date=None):
 def check_low_protein(user_id):
     today = date.today()
     protein_today = db.session.query(db.func.sum(Meal.protein)).filter(Meal.user_id == user_id, Meal.date == today).scalar() or 0
-    bm = BodyMeasurement.query.filter_by(user_id=user_id).order_by(BodyMeasurement.date.desc()).first()
+    bm = BodyMeasurement.query.filter_by(user_id=user_id).order_by(BodyMeasurement.date.desc(), BodyMeasurement.id.desc()).first()
     if bm and bm.weight:
         target = bm.weight * 1.2
     else:
@@ -395,6 +395,41 @@ def dashboard():
     week_workouts = Workout.query.filter(Workout.user_id == session['user_id']).filter(Workout.date >= week_ago).all()
     weekly_workout_cal = sum(w.calories_burned for w in week_workouts)
 
+    today_meals = Meal.query.filter_by(user_id=user_id, date=today).all()
+    daily_macros = {
+        'protein': sum(m.protein for m in today_meals),
+        'carbs': sum(m.carbs for m in today_meals),
+        'fats': sum(m.fats for m in today_meals),
+    }
+    
+    bm = BodyMeasurement.query.filter_by(user_id=user_id).order_by(BodyMeasurement.date.desc(), BodyMeasurement.id.desc()).first()
+    if bm and bm.weight:
+        protein_target_grams = round(bm.weight * 1.2, 1)
+    else:
+        protein_target_grams = 50.0
+    protein_today_grams = daily_macros['protein']
+    try:
+        protein_target_pct = min(100.0, round((protein_today_grams / protein_target_grams) * 100.0, 1)) if protein_target_grams > 0 else 0.0
+    except Exception:
+        protein_target_pct = 0.0
+    
+    if bm and bm.weight:
+        carb_target_grams = round(bm.weight * 5.0, 1)
+        fat_target_grams = round(bm.weight * 1.0, 1)
+    else:
+        carb_target_grams = 250.0
+        fat_target_grams = 50.0
+    carb_today_grams = daily_macros['carbs']
+    fat_today_grams = daily_macros['fats']
+    try:
+        carb_target_pct = min(100.0, round((carb_today_grams / carb_target_grams) * 100.0, 1)) if carb_target_grams > 0 else 0.0
+    except Exception:
+        carb_target_pct = 0.0
+    try:
+        fat_target_pct = min(100.0, round((fat_today_grams / fat_target_grams) * 100.0, 1)) if fat_target_grams > 0 else 0.0
+    except Exception:
+        fat_target_pct = 0.0
+
     return render_template('dashboard.html',
         total_cal=total_cal,
         meals_count=meals_count,
@@ -402,6 +437,17 @@ def dashboard():
         workouts_count=workouts_count,
         weekly_cal=weekly_cal,
         weekly_workout_cal=weekly_workout_cal,
+        today_date=today.isoformat(),
+        protein_target_grams=protein_target_grams,
+        protein_today_grams=protein_today_grams,
+        protein_target_pct=protein_target_pct,
+        carb_target_grams=carb_target_grams,
+        carb_today_grams=carb_today_grams,
+        carb_target_pct=carb_target_pct,
+        fat_target_grams=fat_target_grams,
+        fat_today_grams=fat_today_grams,
+        fat_target_pct=fat_target_pct,
+        daily_macros=daily_macros,
         hide_back_button=True)
 
 @app.route('/meals', methods=['GET','POST'])
@@ -516,6 +562,13 @@ def bulk_delete_meals():
     flash(f'Deleted {count} meal(s)')
     return redirect(url_for('meals'))
 
+SECURITY_QUESTIONS = {
+    'maiden_name': "What is your mother's maiden name?",
+    'pet': "What was your first pet's name?",
+    'city': "What city were you born in?",
+    'school': "What was your first school's name?"
+}
+
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     if request.method == 'POST':
@@ -554,12 +607,12 @@ def reset_password():
                 return render_template('reset_password.html',
                     username=username,
                     user=user,
-                    security_question=user.security_question)
+                    security_question=SECURITY_QUESTIONS.get(user.security_question, user.security_question))
                     
         return render_template('reset_password.html',
             username=username,
             user=user,
-            security_question=user.security_question)
+            security_question=SECURITY_QUESTIONS.get(user.security_question, user.security_question))
             
     return render_template('reset_password.html', user=None)
 
@@ -966,7 +1019,7 @@ def settings():
             flash('Your account and all data have been deleted')
             return redirect(url_for('index'))
 
-    return render_template('settings.html', user=user, hide_back_button=True)
+    return render_template('settings.html', user=user)
 
 @app.route('/analytics')
 def analytics():
@@ -976,7 +1029,7 @@ def analytics():
     
     user_id = session['user_id']
     user_profile = UserProfile.query.filter_by(user_id=user_id).first()
-    body_measurements = BodyMeasurement.query.filter_by(user_id=user_id).order_by(BodyMeasurement.date.desc()).all()
+    body_measurements = BodyMeasurement.query.filter_by(user_id=user_id).order_by(BodyMeasurement.date.desc(), BodyMeasurement.id.desc()).all()
     
     period_days = 30
     period_start = date.today() - timedelta(days=period_days - 1)
@@ -1064,7 +1117,7 @@ def analytics():
     previous_month_logged_pct = round((prev_month_days_logged / prev_month_period_days) * 100.0, 1) if prev_month_period_days > 0 else 0.0
 
     consistency_drop_pct = round(previous_month_logged_pct - monthly_logged_pct, 1)
-    CONSISTENCY_DROP_THRESHOLD = 10.0  # percent points
+    CONSISTENCY_DROP_THRESHOLD = 1.0  # percent points
     consistency_alert = False
     consistency_trend = 'unchanged'
     if consistency_drop_pct >= CONSISTENCY_DROP_THRESHOLD:
@@ -1133,7 +1186,7 @@ def analytics():
         'calories': sum(m.calories for m in today_meals)
     }
     
-    bm = BodyMeasurement.query.filter_by(user_id=user_id).order_by(BodyMeasurement.date.desc()).first()
+    bm = BodyMeasurement.query.filter_by(user_id=user_id).order_by(BodyMeasurement.date.desc(), BodyMeasurement.id.desc()).first()
     if bm and bm.weight:
         protein_target_grams = round(bm.weight * 1.2, 1)
     else:
@@ -1143,6 +1196,23 @@ def analytics():
         protein_target_pct = min(100.0, round((protein_today_grams / protein_target_grams) * 100.0, 1)) if protein_target_grams > 0 else 0.0
     except Exception:
         protein_target_pct = 0.0
+    
+    if bm and bm.weight:
+        carb_target_grams = round(bm.weight * 5.0, 1)
+        fat_target_grams = round(bm.weight * 1.0, 1)
+    else:
+        carb_target_grams = 250.0
+        fat_target_grams = 50.0
+    carb_today_grams = daily_macros['carbs']
+    fat_today_grams = daily_macros['fats']
+    try:
+        carb_target_pct = min(100.0, round((carb_today_grams / carb_target_grams) * 100.0, 1)) if carb_target_grams > 0 else 0.0
+    except Exception:
+        carb_target_pct = 0.0
+    try:
+        fat_target_pct = min(100.0, round((fat_today_grams / fat_target_grams) * 100.0, 1)) if fat_target_grams > 0 else 0.0
+    except Exception:
+        fat_target_pct = 0.0
     
     weight_chart_data = {
         'dates': [m.date.isoformat() for m in body_measurements if m.weight],
@@ -1175,6 +1245,12 @@ def analytics():
                          protein_target_grams=protein_target_grams,
                          protein_today_grams=protein_today_grams,
                          protein_target_pct=protein_target_pct,
+                         carb_target_grams=carb_target_grams,
+                         carb_today_grams=carb_today_grams,
+                         carb_target_pct=carb_target_pct,
+                         fat_target_grams=fat_target_grams,
+                         fat_today_grams=fat_today_grams,
+                         fat_target_pct=fat_target_pct,
                          monthly_days_logged=monthly_days_logged,
                          month_period_days=month_period_days,
                          monthly_logged_pct=monthly_logged_pct,
@@ -1182,8 +1258,7 @@ def analytics():
                          consistency_drop_pct=consistency_drop_pct,
                          consistency_alert=consistency_alert,
                          consistency_trend=consistency_trend,
-                         weight_chart_data=weight_chart_data,
-                         hide_back_button=True)
+                         weight_chart_data=weight_chart_data)
 
 def get_measurement_data(form):
     return {

@@ -30,7 +30,7 @@
           <span class="badge bg-danger ms-1">{{ unread_notifications_count }}</span>
         {% endif %}
       </a>
-      <a class="btn btn-outline-light logout-btn" href="{{ url_for('logout') }}">Logout</a>
+      <a class="btn btn-outline-light logout-btn" data-bs-toggle="modal" data-bs-target="#confirmLogoutModal" href="#">Logout</a>
     </div>
   </div>
 </nav>
@@ -91,6 +91,24 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <button type="button" class="btn btn-danger" id="confirmRemoveFavoriteBtn">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmLogoutModal" tabindex="-1" aria-labelledby="confirmLogoutLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmLogoutLabel">Confirm Logout</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to logout?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
       </div>
     </div>
   </div>

@@ -28,19 +28,4 @@
 <form id="bulk-delete-notification-form" method="post" action="{{ url_for('bulk_delete_notifications') }}" style="display:none;">
   
 </form>
-<div class="mt-3">
-  <button id="send-test-notif" class="btn btn-outline-primary">Send test notification</button>
-</div>
-
-<script>
-document.getElementById('send-test-notif').addEventListener('click', function(){
-  fetch('/notifications/test', {method: 'POST'})
-    .then(r => r.json())
-    .then(d => {
-      
-      if (typeof pollNotifications === 'function') pollNotifications();
-      alert('Test notification created');
-    }).catch(err => alert('Error creating test notification'));
-});
-</script>
 {% endblock %}

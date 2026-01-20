@@ -18,6 +18,126 @@
   </div>
 </div>
 <hr>
+<div class="row mb-4">
+  <div class="col-md-6">
+    <h5>Update Weight</h5>
+    <form method="post" action="{{ url_for('add_body_measurement') }}" class="d-flex gap-2">
+      <input type="hidden" name="date" value="{{ today_date }}">
+      <input type="number" name="weight" placeholder="Weight (kg)" class="form-control" min="0" step="0.1" required>
+      <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+  </div>
+</div>
+<hr>
 <h4>Recent activity</h4>
-<p class="text-muted">This dashboard summarizes your progress. See <a href="{{ url_for('meals') }}">Meals</a> and <a href="{{ url_for('workouts') }}">Workouts</a> for the full logs.</p>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="card-title mb-3">Protein Intake</h6>
+        <div class="d-flex justify-content-between small text-muted mb-2">
+          <div>Today: <strong>{{ protein_today_grams|round(1) }} g</strong></div>
+          <div>Target: <strong>{{ protein_target_grams|round(1) }} g</strong></div>
+        </div>
+        <div class="progress" style="height: 20px;">
+          <div class="progress-bar bg-info" role="progressbar" style="width: {{ protein_target_pct }}%;" aria-valuenow="{{ protein_target_pct }}" aria-valuemin="0" aria-valuemax="100">
+            {{ protein_target_pct }}%
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="card-title mb-3">Carbs Intake</h6>
+        <div class="d-flex justify-content-between small text-muted mb-2">
+          <div>Today: <strong>{{ carb_today_grams|round(1) }} g</strong></div>
+          <div>Target: <strong>{{ carb_target_grams|round(1) }} g</strong></div>
+        </div>
+        <div class="progress" style="height: 20px;">
+          <div class="progress-bar bg-warning" role="progressbar" style="width: {{ carb_target_pct }}%;" aria-valuenow="{{ carb_target_pct }}" aria-valuemin="0" aria-valuemax="100">
+            {{ carb_target_pct }}%
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="card-title mb-3">Fats Intake</h6>
+        <div class="d-flex justify-content-between small text-muted mb-2">
+          <div>Today: <strong>{{ fat_today_grams|round(1) }} g</strong></div>
+          <div>Target: <strong>{{ fat_target_grams|round(1) }} g</strong></div>
+        </div>
+        <div class="progress" style="height: 20px;">
+          <div class="progress-bar bg-danger" role="progressbar" style="width: {{ fat_target_pct }}%;" aria-valuenow="{{ fat_target_pct }}" aria-valuemin="0" aria-valuemax="100">
+            {{ fat_target_pct }}%
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="card-title mb-3">Macronutrient Breakdown</h6>
+        <canvas id="macrosChart" width="300" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="text-muted mt-3">This dashboard summarizes your progress. See <a href="{{ url_for('meals') }}">Meals</a> and <a href="{{ url_for('workouts') }}">Workouts</a> for the full logs.</p>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const macrosCtx = document.getElementById('macrosChart');
+if (macrosCtx) {
+  const macrosData = {
+    labels: ['Protein', 'Carbs', 'Fats'],
+    datasets: [{
+      data: [
+        {{ daily_macros.protein|round(1) }},
+        {{ daily_macros.carbs|round(1) }},
+        {{ daily_macros.fats|round(1) }}
+      ],
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)'
+      ],
+      borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)'
+      ],
+      borderWidth: 2
+    }]
+  };
+  
+  new Chart(macrosCtx, {
+    type: 'pie',
+    data: macrosData,
+    options: {
+      plugins: {
+        legend: {
+          display: true,
+          position: 'right'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let label = context.label || '';
+              if (label) {
+                label += ': ';
+              }
+              const value = context.parsed || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+              label += value.toFixed(1) + ' g (' + percentage + '%)';
+              return label;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+</script>
 {% endblock %}
